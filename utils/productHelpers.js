@@ -16,7 +16,7 @@ async function compareUiProductToApiProduct(uiProduct, apiProduct) {
 
     const uiPriceCents = Math.round(parseFloat(uiPriceText.replace('$', '').trim()) * 100);
 
-    console.log(`🔍 Comparing product: UI = "${uiName}" | API = "${apiProduct.name}"
+    console.log(`Comparing product: UI = "${uiName}" | API = "${apiProduct.name}"
         price: UI = "${uiPriceCents} | API = "${apiProduct.priceCents}"
         Id: UI = "${uIDataProductId} | API = "${apiProduct.id}"`);
 
