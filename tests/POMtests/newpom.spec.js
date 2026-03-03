@@ -307,4 +307,39 @@ test.describe('Home Page Product Tests', () => {
     await expect(checkoutPage.getOrderTotalPrice()).toContainText('52.51');
 
   });
+
+  test('Add 3 random products to cart and verify the total price', async ({ }) => {
+    // Clear the cart first, then come back to the home page
+    await checkoutPage.navigateToCheckoutPage();
+    await checkoutPage.removeAllProductsFromCart();
+    await homePage.navigateToHomePage();
+
+    let expectedTotalCents = 0;
+
+    // Add 3 random products and track their prices
+    for (let i = 0; i < 3; i++) {
+      const { container, name } = await homePage.getRandomProductWithName();
+      const priceText = (await homePage.getProductPriceText(container)).trim();
+
+      // Convert to cents to avoid floating-point rounding issues
+      const priceCents = Math.round(parseFloat(priceText.replace('$', '')) * 100);
+      expectedTotalCents += priceCents;
+
+      await homePage.getProductAddToCartButton(container).click();
+      console.log(`Added product ${i + 1}: "${name}" - ${priceText}`);
+    }
+
+    // Navigate to the cart
+    await homePage.navigateToCart();
+
+    // Get the products subtotal from the payment summary and verify it matches
+    const productsPriceLocator = checkoutPage.getCheckoutProductsPrice();
+    await expect(productsPriceLocator).toBeVisible();
+
+    const displayedPriceText = (await productsPriceLocator.textContent()).trim();
+    const displayedPriceCents = Math.round(parseFloat(displayedPriceText.replace('$', '')) * 100);
+
+    console.log(`Expected total: $${(expectedTotalCents / 100).toFixed(2)} | Displayed total: ${displayedPriceText}`);
+    expect(displayedPriceCents).toBe(expectedTotalCents);
+  });
 });
