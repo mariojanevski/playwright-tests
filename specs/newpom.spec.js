@@ -1,11 +1,11 @@
 import { test, expect, defineConfig } from '@playwright/test'
-import { compareUiProductToApiProduct, navigateToCartAndDeleteAllItems } from '../../utils/productHelpers.js';
-import { HomeScreen } from '../../pages/homeScreen.js';
-import { CheckoutScreen } from '../../pages/checkoutScreen.js';
+import { compareUiProductToApiProduct, navigateToCartAndDeleteAllItems } from '../utils/productHelpers.js';
+import { HomeScreen } from '../pages/homeScreen.js';
+import { CheckoutScreen } from '../pages/checkoutScreen.js';
 import { assert } from 'console';
 
 test.describe('Home Page Product Tests', () => {
-  /** @type {import('../../pages/homeScreen.js').HomeScreen} */
+  /** @type {import('../pages/homeScreen.js').HomeScreen} */
   let homePage;
   let checkoutPage;
   let uiProducts;
