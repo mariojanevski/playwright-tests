@@ -6,7 +6,7 @@ class HomePage {
     }
 
     async navigateToHomePage() {
-        await this.page.goto('http://localhost:50823/amazon.html');
+        await this.page.goto('/amazon.html');
     }
 
     async getNumberOfProductContainers() {

@@ -1,5 +1,11 @@
 // @ts-check
+import path from 'path';
 import { defineConfig, devices } from '@playwright/test';
+
+// The only place the site address is defined. Tests use relative paths like '/amazon.html'.
+// To test another address: BASE_URL=http://127.0.0.1:8080 npx playwright test
+const LOCAL_URL = 'http://127.0.0.1:5500';
+const baseURL = process.env.BASE_URL || LOCAL_URL;
 
 /**
  * Read environment variables from file.
@@ -28,7 +34,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://127.0.0.1:50874/',
+    baseURL,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -72,11 +78,14 @@ export default defineConfig({
     // },
   ],
 
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  /* Use the Live Server already running on port 5500, or start one if there is none.
+     Skipped when BASE_URL is set, and on CI where the amazon-project folder doesn't exist. */
+  webServer: process.env.BASE_URL || process.env.CI ? undefined : {
+    command: 'live-server --host=127.0.0.1 --port=5500 --no-browser --ignore=.git,.claude',
+    cwd: path.resolve(__dirname, '../amazon-project'),
+    url: `${LOCAL_URL}/amazon.html`,
+    reuseExistingServer: true,
+    timeout: 15000,
+  },
 });
 

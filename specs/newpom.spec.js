@@ -95,39 +95,34 @@ test.describe('Home Page Product Tests', () => {
     }
   });
 
-  test('Check if Warranty and Instructions link navigate to correct URL', async ({ page, baseURL }) => {
-    // Get all products
-    const allProducts = await homePage.getAllProductItemLocators();
+  test('Warranty and Instructions links open the correct files', async ({ baseURL }) => {
+    // new URL() joins the parts safely, so we never end up with a double slash like "...50874//images"
+    const expectedWarrantyUrl = new URL('images/appliance-warranty.png', baseURL).href;
+    const expectedInstructionsUrl = new URL('images/appliance-instructions.png', baseURL).href;
 
-    // Define the expected URL for the warranty and instructions link
-    const expectedWarrantyUrl = `${baseURL}/images/appliance-warranty.png`;
-    const expectedInstructionsUrl = `${baseURL}/images/appliance-instructions.png`;
+    // Only the products that have a Warranty link
+    const appliances = homePage.getProductsWithWarrantyLink();
 
-    // Loop through the products and if they have warranty and instructions link, open them and assert they have the correct URL
-    for (let i = 0; i < allProducts.length; i++) {
-      const product = allProducts[i];
+    // If the links disappear from the site, the test must FAIL here (the old version silently passed)
+    await expect(appliances).not.toHaveCount(0);
 
-      const hasWarrantyLink = await product.warrantyLink.isVisible();
-      const hasInstructionsLink = await product.instructionLink.isVisible();
+    const count = await appliances.count();
+    for (let i = 0; i < count; i++) {
+      const product = appliances.nth(i);
+      const name = (await homePage.getProductNameLocator(product).textContent()).trim();
 
-      if (hasWarrantyLink && hasInstructionsLink) {
+      // A product with a Warranty link must also have an Instructions link (the old version skipped it if not)
+      const instructionsLink = homePage.getProductInstructionLink(product);
+      await expect(instructionsLink, `"${name}" is missing the Instructions link`).toBeVisible();
 
-        const warrantyPagePromise = page.context().waitForEvent('page');
-        await product.warrantyLink.click();
-        const warrantyPage = await warrantyPagePromise;
-        await warrantyPage.waitForLoadState();
-        const warrantyUrl = warrantyPage.url();
-        expect(warrantyUrl).toBe(expectedWarrantyUrl);
-        await warrantyPage.close();
+      // Open each link in its new tab and check where it goes
+      const warrantyTab = await homePage.openLinkInNewTab(homePage.getProductWarrantyLink(product));
+      await expect(warrantyTab, `"${name}" Warranty link goes to the wrong place`).toHaveURL(expectedWarrantyUrl);
+      await warrantyTab.close();
 
-        const instructionsPagePromise = page.context().waitForEvent('page');
-        await product.instructionLink.click();
-        const instructionsPage = await instructionsPagePromise;
-        await instructionsPage.waitForLoadState();
-        const instructionsUrl = instructionsPage.url();
-        expect(instructionsUrl).toBe(expectedInstructionsUrl);
-        await instructionsPage.close();
-      }
+      const instructionsTab = await homePage.openLinkInNewTab(instructionsLink);
+      await expect(instructionsTab, `"${name}" Instructions link goes to the wrong place`).toHaveURL(expectedInstructionsUrl);
+      await instructionsTab.close();
     }
   });
 
@@ -136,7 +131,7 @@ test.describe('Home Page Product Tests', () => {
     const allProducts = await homePage.getAllProductItemLocators();
 
     // Define the expected URL for the size chart link
-    const expectedSizeChartUrl = `${baseURL}/images/clothing-size-chart.png`;
+    const expectedSizeChartUrl = new URL('images/clothing-size-chart.png', baseURL).href;
 
     // Loop through the products and if they have Size chart link, open it and assert the URL is correct
     for (let i = 0; i < allProducts.length; i++) {
@@ -250,8 +245,8 @@ test.describe('Home Page Product Tests', () => {
 
   });
 
-  test('Add random product to cart with ammout of 4', async ({ }) => {
-    await page.goto('http://127.0.0.1:65401/amazon.html');
+  test('Add random product to cart with ammout of 4', async ({ page }) => {
+    await page.goto('/amazon.html');
     await page.getByRole('link', { name: 'Cart' }).click();
     // Make sure the cart is empty
     await navigateToCartAndDeleteAllItems(homePage, checkoutPage);

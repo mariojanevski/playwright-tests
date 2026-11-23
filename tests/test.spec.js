@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { getAndValidateProductContainers } from '../utils/productHelpers';
 
 test('first test', async ({ page }) => {
-  await page.goto('http://localhost:60558/amazon.html')
+  await page.goto('/amazon.html')
   await expect(page).toHaveTitle('Amazon Project')
 
   const productContainers = page.locator('.product-container');
@@ -15,7 +15,7 @@ test('first test', async ({ page }) => {
 });
 
 test('loop through all containers and check if they have name and price', async ({ page }) => {
-  await page.goto('http://localhost:60558/amazon.html')
+  await page.goto('/amazon.html')
   await expect(page).toHaveTitle('Amazon Project')
 
   const { productContainers, numberOfProducts } = await getAndValidateProductContainers(page);
@@ -53,7 +53,7 @@ test('loop through all containers and check if they have name and price', async 
 });
 
 test('check what products contain Instructions and Waranty links', async ({ page }) => {
-  await page.goto('http://localhost:60558/amazon.html')
+  await page.goto('/amazon.html')
 
   const { productContainers, numberOfProducts } = await getAndValidateProductContainers(page);
   console.log(`Found ${numberOfProducts} product containers.`);

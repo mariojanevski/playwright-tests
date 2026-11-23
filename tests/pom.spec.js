@@ -67,15 +67,15 @@ test.describe('Home Page Product Tests', () => {
     console.log('Successfully validated name and price for all product containers.');
   });
 
-  test('check what products contain Instructions and Waranty links', async ({page}) => {
+  test('check what products contain Instructions and Waranty links', async ({ page, baseURL }) => {
     const productsCount = await homePage.getNumberOfProductContainers();
     expect(productsCount).toBeGreaterThan(0);
     console.log(`Found ${productsCount} product containers.`);
 
     const allProducts = await homePage.getAllProductItemLocators();
 
-    const expectedWarrantyUrl = 'http://localhost:50823/images/appliance-warranty.png';
-    const expectedInstructionsUrl = 'http://localhost:50823/images/appliance-instructions.png';
+    const expectedWarrantyUrl = new URL('images/appliance-warranty.png', baseURL).href;
+    const expectedInstructionsUrl = new URL('images/appliance-instructions.png', baseURL).href;
 
     for (let i = 0; i < allProducts.length; i++) {
       const product = allProducts[i];

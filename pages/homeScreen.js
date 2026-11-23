@@ -46,6 +46,20 @@ class HomeScreen {
     return productContainer.getByRole('link', { name: 'Size chart' });
   }
 
+  // Only the product boxes that contain a Warranty link (the appliances)
+  getProductsWithWarrantyLink() {
+    return this.productContainers.filter({ has: this.page.getByRole('link', { name: 'Warranty' }) });
+  }
+
+  // Clicks a link that opens in a new tab and returns that new tab
+  async openLinkInNewTab(link) {
+    const newTabPromise = this.page.waitForEvent('popup');
+    await link.click();
+    const newTab = await newTabPromise;
+    await newTab.waitForLoadState();
+    return newTab;
+  }
+
   getDataProductId(productContainer) {
     const button = this.getProductAddToCartButton(productContainer);
     return button.getAttribute('data-product-id');
